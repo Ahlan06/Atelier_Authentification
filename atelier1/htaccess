@@ -1,4 +1,4 @@
 AuthName "Accès protégé"
 AuthType Basic
-Ahlan06/Atelier_Authentification/new/main/atelier1.htpasswd
+AuthUserFile /home/etudiantahlan/www/atelier1/.htpasswd
 Require valid-user
