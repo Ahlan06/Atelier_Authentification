@@ -2,6 +2,13 @@
 // Démarre la session
 session_start();
 
+// Exercice 2 : Compter le nombre de visites
+if (!isset($_SESSION['visit_count'])) {
+    $_SESSION['visit_count'] = 1;
+} else {
+    $_SESSION['visit_count']++;
+}
+
 // Vérifier si l'utilisateur est déjà connecté
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
     // Rediriger selon le rôle
@@ -52,6 +59,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <h1>Atelier authentification par Session</h1>
+    
+    <!-- Exercice 2 : Affichage du nombre de visites -->
+    <p><strong>Vous avez visité cette page d'accueil <?php echo $_SESSION['visit_count']; ?> fois.</strong></p>
+    
     <h3>Pages accessibles :</h3>
     <ul>
         <li><strong>Admin:</strong> login 'admin' / mot de passe 'secret' → <a href="page_admin.php">page_admin.php</a></li>
