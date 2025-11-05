@@ -2,11 +2,19 @@
 // Démarrer une session utilisateur qui sera en mesure de pouvoir gérer les Cookies
 session_start();
 
-// Vérifier si l'utilisateur est déjà en possession d'un cookie valide (cookie authToken ayant le contenu 12345)
-// Si l'utilisateur possède déjà ce cookie, il sera redirigé automatiquement vers la page home.php
-// Dans le cas contraire il devra s'identifier.
-if (isset($_COOKIE['authToken']) && $_COOKIE['authToken'] === '12345') {
-    header('Location: page_admin.php');
+// Exercice 2 : Générer un token unique si il n'existe pas
+if (!isset($_SESSION['auth_token'])) {
+    $_SESSION['auth_token'] = bin2hex(random_bytes(16));
+}
+
+// Vérifier si l'utilisateur est déjà en possession d'un cookie valide
+if (isset($_COOKIE['authToken']) && isset($_SESSION['auth_token']) && $_COOKIE['authToken'] === $_SESSION['auth_token']) {
+    // Rediriger vers la page appropriée
+    if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'user') {
+        header('Location: page_user.php');
+    } else {
+        header('Location: page_admin.php');
+    }
     exit();
 }
 
@@ -15,11 +23,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    // Vérification simple du username et de son password.
-    // Si ok alors on initialise le cookie sur le poste de l'utilisateur 
+    // Vérification des identifiants admin
     if ($username === 'admin' && $password === 'secret') {
-        setcookie('authToken', '12345', time() + 60, '/', '', false, true); // Le Cookie est initialisé et valable pendant 1 min 
-        header('Location: page_admin.php'); // L'utilisateur est dirigé vers la page home.php
+        // Exercice 1 : Cookie valable 1 minute (60 secondes)
+        setcookie('authToken', $_SESSION['auth_token'], time() + 60, '/', '', false, true);
+        $_SESSION['user_role'] = 'admin';
+        header('Location: page_admin.php');
+        exit();
+    } 
+    // Exercice 3 : Ajout de l'utilisateur "user"
+    else if ($username === 'user' && $password === 'utilisateur') {
+        // Exercice 1 : Cookie valable 1 minute (60 secondes)
+        setcookie('authToken', $_SESSION['auth_token'], time() + 60, '/', '', false, true);
+        $_SESSION['user_role'] = 'user';
+        header('Location: page_user.php');
         exit();
     } else {
         $error = "Nom d'utilisateur ou mot de passe incorrect.";
@@ -36,7 +53,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <h1>Atelier authentification par Cookie</h1>
-    <h3>La page <a href="page_admin.php">page_admin.php</a> est inaccéssible tant que vous ne vous serez pas connecté avec le login 'admin' et mot de passe 'secret'</h3>
+    <h3>Pages accessibles :</h3>
+    <ul>
+        <li><strong>Admin:</strong> login 'admin' / mot de passe 'secret' → <a href="page_admin.php">page_admin.php</a></li>
+        <li><strong>User:</strong> login 'user' / mot de passe 'utilisateur' → <a href="page_user.php">page_user.php</a></li>
+    </ul>
+    
+    <?php if (isset($error)): ?>
+        <p style="color: red;"><?php echo $error; ?></p>
+    <?php endif; ?>
+    
     <form method="POST" action="">
         <label for="username">Nom d'utilisateur :</label>
         <input type="text" id="username" name="username" required>
